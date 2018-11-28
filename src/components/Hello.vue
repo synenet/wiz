@@ -86,6 +86,7 @@ export default {
   created () {
     this.$on('LoadPeople', () => this.fetchPeople())
     this.$on('InsertPeople', () => this.insertPeople())
+    this.$on('loadMovie', () => this.movieList())
   },
   methods: {
     message () {
@@ -97,7 +98,7 @@ export default {
       .then(
         (res) => {
           this.movies = res.data
-          this.loading = false
+          this.$emit('loadMovie')
         }
       )
       .catch()
@@ -113,9 +114,10 @@ export default {
         this.movChar.push(character)
       })
       this.$emit('LoadPeople')
+      this.loading = false
     },
     fetchPeople () {
-      this.loading = true
+      this.loading = false
       const peopleLink = this.movChar
       peopleLink.map((link) => {
         axios.get(link)
@@ -127,25 +129,28 @@ export default {
       })
       this.items = []
       this.$emit('InsertPeople')
+      this.loading = false
     },
     insertPeople () {
+      this.loading = false
       const people = this.people
       people.map((ppl) => {
         const item = {isActive: true, age: ppl.age, name: ppl.name, gender: ppl.gender, height: ppl.height}
         this.items.push(item)
       })
       this.loading = false
-    }
-  },
-  mounted: function () {
-    this.fetchMovies()
-  },
-  computed: {
-    movieList: function () {
+    },
+    movieList () {
       this.movies.results.map((movie) => {
         this.myMovie.push(movie.title)
       })
-    },
+      this.loading = false
+    }
+  },
+  mounted () {
+    this.fetchMovies()
+  },
+  computed: {
     totalHeight: function () {
       let b = []
       this.newCharacter.map((ppl) => {
